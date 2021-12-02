@@ -1,0 +1,1 @@
+A C++ library implementing base45 & base64 encoding/decoding
