@@ -5,6 +5,8 @@
 #include <string.h>
 #include <math.h>
 
+using namespace std;
+
 /*** BASE45 LIB C++ ***\
   The Alphanumeric mode is defined to use 45 characters as specified in
    this alphabet.
@@ -29,18 +31,49 @@
 class Base45 {
   public:
 
+  int swapTable(int byte) {
+    if (byte >= 0 && byte <= 9) {
+      return byte + 48;
+    }
 
-  void encode(char data[]) {
+    if (byte > 9 && byte < 36) {
+      return byte + 55;
+    }
+
+    switch(byte) {
+      case 36:
+        return ' ';
+      case 37:
+        return '$';
+      case 38: 
+        return '%';
+      case 39:
+        return '*';
+      case 40:
+        return '+';
+      case 41: 
+        return '-';
+      case 42:
+        return '.';
+      case 43:
+        return '/';
+      case 44:
+        return ':';
+      default:
+        return byte;
+    }
+
+  }
+
+  void encode(string data) {
     /** Make vector */
-    std::vector<int> bytes;
-    std::vector<std::array<int, 3>> remainders;
-    int length = strlen(data);
+    vector<int> bytes;
     int counter = 0;
     int byteIndex = 0;
-    while(counter != length) {
+    while(counter != data.length()) {
       int byte = 0;
 
-      if (counter == length - 1) {
+      if (counter == data.length() - 1) {
         byte = data[counter];
         bytes.push_back(byte);
         break;
@@ -51,8 +84,9 @@ class Base45 {
       counter += 2;
     }
 
+    vector<std::array<int, 3>> remainders;
     for (int i = 0; i < bytes.size(); i++) {
-      std::array<int, 3> remainderTriples = {0};
+      array<int, 3> remainderTriples = {0};
       int byte = bytes[i];
       for (int j = 0; j < 3; j++) {
         int remainder = byte % 45;
@@ -63,11 +97,16 @@ class Base45 {
       remainders.push_back(remainderTriples);
     }
 
+    vector<int> result;
     for(int i = 0; i < remainders.size(); i++) {
       for (int j = 0; j < 3; j++) {
-        std::cout << remainders[i][j] << " ";
+        result.push_back(swapTable(remainders[i][j]));
       }
-      std::cout << "\n";
+    }
+
+    result.pop_back();
+    for (int i = 0; i < result.size(); i++) {
+      cout << (char)result[i];
     }
      
   }
@@ -79,7 +118,7 @@ class Base45 {
 
 
 int main() {
-  char input[] = "Hello!!";
+  string input ("Hello!! sup");
   Base45 base45;
   base45.encode(input);
   return 0;
