@@ -1,11 +1,15 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <array>
 #include <bitset>
 #include <string.h>
 #include <math.h>
+#include <sstream>
+#include <stdio.h>
 
 using namespace std;
+
 
 /*** BASE45 LIB C++ ***\
   The Alphanumeric mode is defined to use 45 characters as specified in
@@ -65,7 +69,7 @@ class Base45 {
 
   }
 
-  int swapBackTable(int byte) {
+  unsigned char swapBackTable(unsigned char byte) {
     if (byte >= 48 && byte <= 57) {
       return byte - 48;
     }
@@ -99,31 +103,25 @@ class Base45 {
 
   }
 
-  void encode(string data) {
+  vector<unsigned char> encode(vector<unsigned char> data) {
     /** Make vector */
-    vector<int> bytes;
+    vector<unsigned int> bytes;
     int counter = 0;
     int byteIndex = 0;
-    while(counter != data.length()) {
-      int byte = 0;
-
-      if (counter == data.length() - 1) {
-        byte = data[counter];
-        bytes.push_back(byte);
-        break;
-      }
-
+    while(counter != data.size()) {
+      unsigned int byte = 0;
       byte = (data[counter] * 256) + data[counter + 1];
       bytes.push_back(byte);
       counter += 2;
     }
 
-    vector<array<int, 3>> remainders;
+
+    vector<array<unsigned char, 3>> remainders;
     for (int i = 0; i < bytes.size(); i++) {
-      array<int, 3> remainderTriples = {0};
-      int byte = bytes[i];
+      array<unsigned char, 3> remainderTriples = {0};
+      unsigned int byte = bytes[i];
       for (int j = 0; j < 3; j++) {
-        int remainder = byte % 45;
+        unsigned char remainder = byte % 45;
         byte = (byte - remainder) / 45;
         remainderTriples[j] = remainder;
       }
@@ -131,35 +129,38 @@ class Base45 {
       remainders.push_back(remainderTriples);
     }
 
-    vector<int> result;
+    int checker = 0;
+    for (int i = 0; i < 3; i++) {
+      checker += remainders[remainders.size() - 1][i];
+    }
+    
+    if (checker == 0) remainders.pop_back();
+    
+    vector<unsigned char> result;
     for(int i = 0; i < remainders.size(); i++) {
       for (int j = 0; j < 3; j++) {
         result.push_back(swapTable(remainders[i][j]));
       }
     }
 
-    result.pop_back();
-    for (int i = 0; i < result.size(); i++) {
-      cout << (char)result[i];
-    }
-     
+    return result;
   }
 
-  void decode(string data) {
-    vector<array<int, 3>> remainders; 
-    for (int i = 0; i < data.length(); i) {
-      array<int, 3> remaindersTriples = {0};
+  vector<unsigned char> decode(vector<unsigned char> data) {
+    vector<array<unsigned char, 3>> remainders; 
+    for (int i = 0; i < data.size(); i) {
+      array<unsigned char, 3> remaindersTriples = {0};
       for (int j = 0; j < 3; j++) {
-        remaindersTriples[j] = swapBackTable(data[i++]);
+        remaindersTriples[j] = swapBackTable(data[i]);
+        i++;
       }
-
+      
       remainders.push_back(remaindersTriples);
     }
-
-    vector<int> byteSequence;
-
+   
+    vector<unsigned int> byteSequence;
     for (int i = 0; i < remainders.size(); i++) {
-      int returnByte = 0;
+      unsigned int returnByte = 0;
       for (int j = 0; j < 3; j++) {
         returnByte += remainders[i][j] * pow(45, j);
       }
@@ -167,38 +168,18 @@ class Base45 {
       byteSequence.push_back(returnByte);
     }
 
-    cout << "\n";
-
-    vector<int> restoredBytes;
+    vector<unsigned char> restoredBytes;
     for (int i = 0; i < byteSequence.size(); i += 1) {
-      if (i == byteSequence.size() - 1) {
-        restoredBytes.push_back(byteSequence[i]);
-        break;
-      }
-      int remainder = byteSequence[i] % 256;
-      int firstToPush = (byteSequence[i] - remainder) / 256;
+      unsigned char remainder = byteSequence[i] % 256;
+      unsigned char firstToPush = (byteSequence[i] - remainder) / 256;
       restoredBytes.push_back(firstToPush);
       restoredBytes.push_back(remainder);
     }
 
-    for (int i = 0; i < restoredBytes.size(); i++) {
-      cout << (char)restoredBytes[i];
-    }
-    // for (int i = 0; i < remainders.size(); i++) {
-    //   for (int j = 0; j < 3; j++) {
-    //     cout << remainders[i][j] << " ";
-    //   }
-    //   cout << "\n";
-    // }
+    return restoredBytes;
   }
 };
 
-
 int main() {
-  string input ("Sir, what are you doing");
-  string toDecode ("NOANJEV44 8DSUEGECDZC$FFE EGVCZEDD2");
   Base45 base45;
-  base45.encode(input);
-  base45.decode(toDecode);
-  return 0;
 }
