@@ -2,11 +2,9 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <bitset>
 #include <string.h>
 #include <math.h>
 #include <sstream>
-#include <stdio.h>
 
 using namespace std;
 
@@ -103,22 +101,27 @@ class Base45 {
 
   }
 
+  /** ENCODER **/
   vector<unsigned char> encode(vector<unsigned char> data) {
-    /** Make vector */
     vector<unsigned int> bytes;
     int counter = 0;
     int byteIndex = 0;
-    while(counter != data.size()) {
+    while(counter < data.size()) {
       unsigned int byte = 0;
-      byte = (data[counter] * 256) + data[counter + 1];
+      if (counter == data.size() - 1)
+        byte = data[counter];
+      else
+        byte = (data[counter] * 256) + data[counter + 1];
+      
       bytes.push_back(byte);
+      cout << byte;
+      cout << "\n";
       counter += 2;
     }
 
-
     vector<array<unsigned char, 3>> remainders;
     for (int i = 0; i < bytes.size(); i++) {
-      array<unsigned char, 3> remainderTriples = {0};
+      array<unsigned char, 3 > remainderTriples = {0};
       unsigned int byte = bytes[i];
       for (int j = 0; j < 3; j++) {
         unsigned char remainder = byte % 45;
@@ -129,32 +132,34 @@ class Base45 {
       remainders.push_back(remainderTriples);
     }
 
-    int checker = 0;
-    for (int i = 0; i < 3; i++) {
-      checker += remainders[remainders.size() - 1][i];
-    }
-    
-    if (checker == 0) remainders.pop_back();
-    
     vector<unsigned char> result;
     for(int i = 0; i < remainders.size(); i++) {
       for (int j = 0; j < 3; j++) {
+        if (i == remainders.size() -1 && remainders[i][2] == 0) {
+          if (remainders[i][j] == 0)
+            break;
+        }
         result.push_back(swapTable(remainders[i][j]));
+
       }
+
     }
 
     return result;
   }
 
+  /** DECODER **/
   vector<unsigned char> decode(vector<unsigned char> data) {
+    bool breakIt = false;
     vector<array<unsigned char, 3>> remainders; 
     for (int i = 0; i < data.size(); i) {
       array<unsigned char, 3> remaindersTriples = {0};
+      /** Clean out zeros**/
       for (int j = 0; j < 3; j++) {
         remaindersTriples[j] = swapBackTable(data[i]);
         i++;
       }
-      
+
       remainders.push_back(remaindersTriples);
     }
    
@@ -172,14 +177,11 @@ class Base45 {
     for (int i = 0; i < byteSequence.size(); i += 1) {
       unsigned char remainder = byteSequence[i] % 256;
       unsigned char firstToPush = (byteSequence[i] - remainder) / 256;
-      restoredBytes.push_back(firstToPush);
+      if (firstToPush != 0)
+        restoredBytes.push_back(firstToPush);
       restoredBytes.push_back(remainder);
     }
 
     return restoredBytes;
   }
 };
-
-int main() {
-  Base45 base45;
-}
