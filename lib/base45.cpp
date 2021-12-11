@@ -114,8 +114,6 @@ class Base45 {
         byte = (data[counter] * 256) + data[counter + 1];
       
       bytes.push_back(byte);
-      cout << byte;
-      cout << "\n";
       counter += 2;
     }
 
