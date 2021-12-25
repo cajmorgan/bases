@@ -183,3 +183,46 @@ class Base45 {
     return restoredBytes;
   }
 };
+
+const char *arg_list[] = {"-d", "-e"};
+
+int main(int argc, char **argv) {
+  string arg;
+  Base45 base45; 
+  vector<unsigned char> input;
+  vector<unsigned char> output;
+
+  /** Get args*/
+  if (argc < 3) {
+    cout << "No arguments supplied, -e for encode & -d for decode\n";
+    return 1;
+  }
+
+  for (int i = 0; i < argc; i++) {
+    if (strcmp(argv[1], arg_list[i]) == 0) {
+      arg = argv[1];
+      for (int i = 0; i < strlen(argv[2]); i++) {
+        input.push_back(argv[2][i]);
+      }
+      break;
+    }
+  }
+
+  if (arg.length() == 0) {
+    cout << "Unknown args, -e for encode & -d for decode\n";
+    return 1;
+  } 
+
+  
+  if (arg == "-e") {
+    output = base45.encode(input);
+  } else if (arg == "-d") {
+    output = base45.decode(input);
+  }
+  
+  for (int i = 0; i < output.size(); i++) {
+    cout << output[i];
+  }
+
+  cout << "\n";
+}
