@@ -257,14 +257,47 @@ class Base64 {
 
 };
 
-int main() {
-  vector <unsigned char> input = {'a','G','V','s','b','3','J','z','Z','A','=','='};
-  Base64 base64;
-  vector<unsigned char> decoded = base64.decode(input);
-  
-  for (int i = 0; i < decoded.size(); i++) {
-    cout << decoded[i];
+const char *arg_list[] = {"-d", "-e"};
+
+int main(int argc, char **argv) {
+  string arg;
+  Base64 base64; 
+  vector<unsigned char> input;
+  vector<unsigned char> output;
+
+  /** Get args*/
+  if (argc < 3) {
+    cout << "No arguments supplied, -e for encode & -d for decode\n";
+    return 1;
   }
+
+  for (int i = 0; i < argc; i++) {
+    if (strcmp(argv[1], arg_list[i]) == 0) {
+      arg = argv[1];
+      for (int i = 0; i < strlen(argv[2]); i++) {
+        input.push_back(argv[2][i]);
+      }
+      break;
+    }
+  }
+
+  if (arg.length() == 0) {
+    cout << "Unknown args, -e for encode & -d for decode\n";
+    return 1;
+  } 
+
+  
+  if (arg == "-e") {
+    output = base64.encode(input);
+  } else if (arg == "-d") {
+    output = base64.decode(input);
+  }
+  
+  for (int i = 0; i < output.size(); i++) {
+    cout << output[i];
+  }
+
+  cout << "\n";
 
   return 0;
 }
