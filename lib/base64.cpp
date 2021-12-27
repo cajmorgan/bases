@@ -36,10 +36,14 @@ using namespace std;
 
 #define SEXTET 63
 #define OCTET 255
-
+/** Encoding **/
 #define NO_PADDING 3
 #define ONE_PADDING 2
 #define TWO_PADDING 1
+/** Decoding **/
+#define NO_PADDING_REV 4
+#define ONE_PADDING_REV 3
+#define TWO_PADDING_REV 2
 
 class Base64 {
 
@@ -219,21 +223,21 @@ class Base64 {
 
       vector<unsigned char> octets;
       switch(number_of_sextets) {
-        case 4: {
+        case NO_PADDING_REV: {
           for (int step = number_of_sextets/2; step >= 0; step--) {
             unsigned char first = (joined >> (8*step)) & OCTET;
             octets.push_back(first);
           }
 
           break;
-        } case 3: {
+        } case ONE_PADDING_REV: {
           unsigned char first = (joined >> 10) & OCTET;
           unsigned char second = (joined >> 2) & OCTET;
           octets.push_back(first);
           octets.push_back(second);
           break;
           
-        } case 2: {
+        } case TWO_PADDING_REV: {
           unsigned char first = (joined >> 4) & OCTET;
           octets.push_back(first);
           break;
